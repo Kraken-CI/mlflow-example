@@ -7,7 +7,7 @@ from mlflow.tracking.fluent import _get_experiment_id
 from mlflow.utils import mlflow_tags
 from mlflow.utils.logging_utils import eprint
 
-from flow_steps import constants as const
+import constants as const
 
 
 def _already_ran(entry_point_name, parameters, git_commit, experiment_id=None):
@@ -60,8 +60,9 @@ def _get_or_run(entrypoint, parameters, git_commit, use_cache=True):
 @click.option("--company-abbreviation", type=str, default="MSFT")
 @click.option("--lstm-units", type=int, default=50)
 @click.option("--max-row-limit", type=int, default=100000)
-@click.option("--bucket-name", type=str, default="stock-market-models")
-def workflow(company_abbreviation, lstm_units, max_row_limit, bucket_name):
+@click.option("--batch-size", type=int, default=30)
+@click.option("--epochs", type=int, default=5)
+def workflow(company_abbreviation, lstm_units, max_row_limit, batch_size, epochs):
     with mlflow.start_run() as active_run:
         git_commit = active_run.data.tags.get(mlflow_tags.MLFLOW_GIT_COMMIT)
 
@@ -78,7 +79,10 @@ def workflow(company_abbreviation, lstm_units, max_row_limit, bucket_name):
                                             const.TRANSFORMED_ARTIFACT_DIR, const.TRANSFORMED_DATASET_NAME)
 
         train_model_run = _get_or_run(const.TRAIN_STEP,
-                                      {"stock_data": transformed_dataset_dir, "lstm_units": lstm_units},
+                                      {"stock_data": transformed_dataset_dir,
+                                       "lstm_units": lstm_units,
+                                       "batch_size": batch_size,
+                                       "epochs": epochs},
                                       git_commit,
                                       use_cache=False)
         trained_model_dir = path.join(train_model_run.info.artifact_uri,
@@ -86,11 +90,6 @@ def workflow(company_abbreviation, lstm_units, max_row_limit, bucket_name):
                                       "data",
                                       const.STOCK_MODEL_PATHS,
                                       const.MODEL_ARTIFACT_NAME)
-
-        _get_or_run(const.DEPLOY_STEP,
-                    {"model_dir": trained_model_dir, "bucket_name": bucket_name},
-                    git_commit,
-                    use_cache=False)
 
 
 if __name__ == '__main__':

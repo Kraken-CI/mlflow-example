@@ -108,7 +108,9 @@ def prepare_data(raw_data: pd.DataFrame, left_bound: int, right_bound: int) -> t
 @click.command(help="Train LSTM Network using transformed data")
 @click.option("--stock-data", type=str)
 @click.option("--lstm-units", type=int, default=50)
-def train_model(stock_data, lstm_units):
+@click.option("--batch-size", type=int, default=30)
+@click.option("--epochs", type=int, default=5)
+def train_model(stock_data, lstm_units, batch_size, epochs):
     lstm_data = pd.read_csv(stock_data)
     scalar = MinMaxScaler(feature_range=(0, 1))
     scaled_data = scalar.fit_transform(lstm_data)
@@ -132,8 +134,8 @@ def train_model(stock_data, lstm_units):
         model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
         model.fit(x_train,
                   y_train,
-                  epochs=1,
-                  batch_size=1,
+                  epochs=epochs,
+                  batch_size=batch_size,
                   verbose=1,
                   callbacks=[MLflowLogger(model, artifact_path=MODEL_ARTIFACT_PATH)]
                   )
