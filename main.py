@@ -1,4 +1,5 @@
 from os import path
+import json
 
 import click
 import mlflow
@@ -90,6 +91,13 @@ def workflow(company_abbreviation, lstm_units, max_row_limit, batch_size, epochs
                                       "data",
                                       const.STOCK_MODEL_PATHS,
                                       const.MODEL_ARTIFACT_NAME)
+
+    print('Run params:', train_model_run.data.params)
+    print('Run metrics:', train_model_run.data.metrics)
+    with open("metrics.json", "w") as outfile:
+        json.dump(train_model_run.data.metrics, outfile)
+    with open("params.json", "w") as outfile:
+        json.dump(train_model_run.data.params, outfile)
 
 
 if __name__ == '__main__':
