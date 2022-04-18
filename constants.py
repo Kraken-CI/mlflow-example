@@ -1,5 +1,3 @@
-QUANLD_API = "https://www.quandl.com/api/v3/datasets/WIKI"
-
 # METRICS
 TRAIN_ROWS_METRIC = "training_nrows"
 TEST_ROWS_METRIC = "test_nrows"
