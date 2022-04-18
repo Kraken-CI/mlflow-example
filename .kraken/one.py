@@ -2,7 +2,7 @@ def stage(ctx):
     return {
         "parent": "root",
         "triggers": {
-            "parent": True,
+            "interval": "24h"
         },
         "parameters": [],
         "configs": [],
